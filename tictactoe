@@ -1,0 +1,19 @@
+if (isDraw(gameState.board)) {
+      gameState.gameOver = true;
+      return message.reply(`𝐻𝑜̀𝑎 𝑟𝑜̂̀𝑖! 🤝\n${printBoard(gameState.board)}`);
+    }
+
+    const computerPos = computerMove(gameState.board);
+    if (isWin(gameState.board, 'O')) {
+      gameState.gameOver = true;
+      return message.reply(`𝐵𝑎̣𝑛 đ𝑎̃ 𝑡ℎ𝑢𝑎⚰️☠️! 😢 𝗠𝗮́𝘆 đ𝗮̃ 𝗰𝗵𝗼̣𝗻 𝗼̂ ${computerPos}.\n${printBoard(gameState.board)}`);
+    }
+
+    if (isDraw(gameState.board)) {
+      gameState.gameOver = true;
+      return message.reply(`𝐻𝑜̀𝑎 𝑟𝑜̂̀𝑖! 🤝𝗠𝗮́𝘆 đ𝗮̃ 𝗰𝗵𝗼̣𝗻 𝗼̂ ${computerPos}.\n${printBoard(gameState.board)}`);
+    }
+
+    return message.reply(`Bạn đã chọn ô ${playerMove}.\n${printBoard(gameState.board)}\n𝑺𝒐̛𝒏 𝒑𝒆́𝒐 đ𝒂𝒏𝒈 𝒔𝒖𝒚 𝒏𝒈𝒉𝒊̃⌚🥱... 𝑺𝒐̛𝒏 𝒑𝒆́𝒐 đ𝘢̃ 𝘤𝘩𝘰̣𝘯 𝘰̂ ${computerPos}.`);
+  }
+};
