@@ -55,7 +55,6 @@ module.exports = {
             fs.writeFileSync(avatar1Path, avatar1.data);
             fs.writeFileSync(avatar2Path, avatar2.data);
 
-            // Tạo Embed với avatar
             const embed = new EmbedBuilder()
                 .setTitle('💘 Ghép Đôi Thành Công! 💘')
                 .setColor('Red')
