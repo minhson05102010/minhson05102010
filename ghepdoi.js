@@ -67,7 +67,6 @@ module.exports = {
             const attachment1 = new AttachmentBuilder(avatar1Path, { name: `${user1.id}.png` });
             const attachment2 = new AttachmentBuilder(avatar2Path, { name: `${user2.id}.png` });
 
-            // Gửi tin nhắn với avatar và embed
             await interaction.reply({
                 embeds: [embed],
                 files: [attachment1, attachment2],
