@@ -1,6 +1,7 @@
 # Lâm Minh Sơn
 
-![Profile Image](https://via.placeholder.com/150)
+![Profile Image](![image](https://github.com/user-attachments/assets/9e45e399-1052-4414-bfdb-529f350fbd09)
+)
 
 ## Thông tin cá nhân
 
