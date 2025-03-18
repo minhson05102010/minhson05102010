@@ -1,12 +1,18 @@
-- 👋 Hi, I’m @minhson05102010
-- 👀 I’m interested in ...
-- 🌱 I’m currently learning ...
-- 💞️ I’m looking to collaborate on ...
-- 📫 How to reach me ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
+# Lâm Minh Sơn
 
-<!---
-minhson05102010/minhson05102010 is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
-You can click the Preview link to take a look at your changes.
---->
+![Profile Image](https://via.placeholder.com/150)
+
+## Thông tin cá nhân
+
+- **🌸Tên:** Lâm Minh Sơn
+- **🎂Tuổi:** 15
+- **💫Ngày sinh:** 05/10/2010
+- **🌏Ngôn ngữ lập trình tốt nhất:** JavaScript, Python, Linux, Three.js, Java
+
+## Liên hệ
+
+- **Facebook🪼:** [Lâm Minh Sơn](https://www.facebook.com/lms.cutii/)
+
+## Giới thiệu
+
+ỦNG HỘ CHO TAO THÌ CHO 1 SAO NGHE CHXXX TAO GHÉT CMAY SKIBIDIIIII
