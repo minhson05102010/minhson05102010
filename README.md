@@ -1,6 +1,6 @@
 # Lâm Minh Sơn
 
-![Profile Image](![image](https://github.com/user-attachments/assets/9e45e399-1052-4414-bfdb-529f350fbd09)
+![Profile Image](![image](https://image.dienthoaivui.com.vn/x,webp,q90/https://dashboard.dienthoaivui.com.vn/uploads/dashboard/editor_upload/hinh-nen-may-tinh-4k-51.jpg)
 )
 
 ## Thông tin cá nhân
