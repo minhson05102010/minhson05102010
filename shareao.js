@@ -6,30 +6,19 @@ var number = 1;
 var count = 0;
 var failed = 0;
 var chalk = require('chalkercli');
-//console.log(chalk.bold.hex("#FF0000")(`[ VN ] → TOOL SHARE ẢO V1.1 được viết bởi Nguyễn Đinh Tiến Dũng`));
-console.log('[ VN ] → TOOL SHARE ẢO V1.1 được viết bởi Nguyễn Đinh Tiến Dũng')
-console.log('[ EN ] → TOOL VIRTUAL SHARE V1.1 code by Nguyen Đinh Tien Dung')
+//console.log(chalk.bold.hex("#FF0000")(`[ VN ] → TOOL SHARE ẢO V1.1 `));
+console.log('[ VN ] → TOOL SHARE ẢO V1.1 ')
+console.log('[ EN ] → TOOL VIRTUAL SHARE V1.1 ')
 var rainbow = chalk.rainbow(`
                       ==========================================
                     *                                            *
-             ██████╗░██╗░░░██╗███╗░░██╗░██████╗░██╗░░██╗░█████╗░███╗░░██╗
-             ██╔══██╗██║░░░██║████╗░██║██╔════╝░██║░██╔╝██╔══██╗████╗░██║
-             ██║░░██║██║░░░██║██╔██╗██║██║░░██╗░█████═╝░██║░░██║██╔██╗██║
-             ██║░░██║██║░░░██║██║╚████║██║░░╚██╗██╔═██╗░██║░░██║██║╚████║
-             ██████╔╝╚██████╔╝██║░╚███║╚██████╔╝██║░╚██╗╚█████╔╝██║░╚███║
-             ╚═════╝░░╚═════╝░╚═╝░░╚══╝░╚═════╝░╚═╝░░╚═╝░╚════╝░╚═╝░░╚══╝
+            ĐỊT CỤ AOV
                     *                                            *
                     *               - INFO ADMIN -               *
                     *   → TOOL SHARE ẢO FACEBOOK                 *
                     *   → Loại Tool: NodeJS                      *
                     *   → Phiên bản: V1.1                        *
-                    *   → Tên: Nguyễn Đinh Tiến Dũng - Dũngkon   *
-                    *   → FB: Nguyễn Đinh Tiến Dũng              *
-                    *   → SĐT/Zalo: 0367281079                   *
-                    *   → Email: dungnguyen200214@gmail.com      *
-                    *   → Github: dungkon2002                    *
-                    *   → Ghi Chú: Tool lỗi liên hệ admin        *
-                    *                                            *
+                  
                       ==========================================\n`).stop();
 rainbow.render();
 var frame = rainbow.frame();
