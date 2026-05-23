@@ -46,7 +46,8 @@ const MENU = [
   { id: '14', label: 'Token Joiner', file: './chucnang/tokenjoiner' },
   { id: '15', label: 'Report User', file: './chucnang/reportuser' },
   { id: '16', label: 'Token Online', file: './chucnang/tokenonliner' },
-  { id: '17', label: 'Nitro Gen(It will work if u luck:3)', file: './chucnang/nitrogen' },
+  { id: '17', label: 'Nitro Gen', file: './chucnang/nitrogen' },
+  { id: '18', label: 'Token Humanizer', file: './chucnang/humanizer' },
 ];
 
 function stripAnsi(str) {
