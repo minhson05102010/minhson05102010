@@ -47,7 +47,7 @@ const MENU = [
   { id: '15', label: 'Report User', file: './chucnang/reportuser' },
   { id: '16', label: 'Token Online', file: './chucnang/tokenonliner' },
   { id: '17', label: 'Nitro Gen', file: './chucnang/nitrogen' },
-  { id: '18', label: 'Token Humanizer', file: './chucnang/humanizer' },
+  { id: '18', label: 'Orbs Farmer', file: './chucnang/orbs },
 ];
 
 function stripAnsi(str) {
