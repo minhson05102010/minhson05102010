@@ -7,14 +7,8 @@ const crypto = require('crypto');
 
 const { log, sleep, ask } = require('../utils/theme');
 
-// =========================
-// RESULT FILE
-// =========================
 const ORBS_RESULT_FILE = path.join(__dirname, '..', 'orbs_result.txt');
 
-// =========================
-// CLIENT PROPS — giong Discord Client that (lay tu engine.ts goc)
-// =========================
 const CLIENT_PROPS = {
   os: 'Windows',
   browser: 'Discord Client',
@@ -39,7 +33,6 @@ const CLIENT_PROPS = {
 const USER_AGENT = CLIENT_PROPS.browser_user_agent;
 const X_SUPER   = Buffer.from(JSON.stringify(CLIENT_PROPS)).toString('base64');
 
-// Task types — phai dung chinh xac string nay vi la key trong object tasks
 var T = {
   WATCH_VIDEO:           'WATCH_VIDEO',
   WATCH_VIDEO_ON_MOBILE: 'WATCH_VIDEO_ON_MOBILE',
@@ -48,9 +41,6 @@ var T = {
   PLAY_ACTIVITY:         'PLAY_ACTIVITY',
 };
 
-// =========================
-// HELPERS
-// =========================
 function rInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
 function beep()     { try { process.stdout.write('\x07'); } catch(e){} }
 
@@ -72,9 +62,6 @@ function saveLog(line) {
   try { fs.appendFileSync(ORBS_RESULT_FILE, line+'\n','utf-8'); } catch(e){}
 }
 
-// =========================
-// HTTP
-// =========================
 function api(method, endpoint, token, body) {
   return new Promise(function(resolve) {
     var bs = body !== undefined ? JSON.stringify(body) : null;
@@ -120,13 +107,7 @@ function api(method, endpoint, token, body) {
   });
 }
 
-// =========================
-// QUEST PARSER
-// Quan trong: API tra ve { id, config: { task_config: { tasks: { WATCH_VIDEO: {...}, ... } } } }
-// detectTaskType phai kiem tra tat ca key co the
-// =========================
 function getTasks(quest) {
-  // Discord doi ten tu task_config sang task_config_v2
   try {
     var tc = quest.config.task_config_v2 || quest.config.task_config;
     return (tc && tc.tasks) ? tc.tasks : null;
@@ -146,7 +127,6 @@ function detectType(quest) {
     if (tasks[order[i]] != null) return order[i];
   }
 
-  // Fallback: lay key dau tien
   var keys = Object.keys(tasks);
   if (keys.length > 0) return keys[0];
   return null;
@@ -170,11 +150,11 @@ function getProgress(quest) {
 function getAppId(quest) {
   try {
     var tc = getTaskConfig(quest);
-    // Thu developer_application_id trong task_config_v2
+ 
     if (tc && tc.developer_application_id) return tc.developer_application_id;
-    // Thu application.id
+   
     if (quest.config.application && quest.config.application.id) return quest.config.application.id;
-    // Thu trong tung task: external_ids
+    
     var tasks = getTasks(quest);
     if (tasks) {
       var t = detectType(quest);
@@ -208,9 +188,6 @@ function isEnrolled(quest)  { try { return !!quest.user_status.enrolled_at; }  c
 function isCompleted(quest) { try { return !!quest.user_status.completed_at; } catch(e){ return false; } }
 function isClaimed(quest)   { try { return !!quest.user_status.claimed_at; }   catch(e){ return false; } }
 
-// =========================
-// DEBUG: in raw quest data de kiem tra cau truc
-// =========================
 function debugQuest(quest) {
   log.info('  [DEBUG] Quest raw keys: ' + Object.keys(quest||{}).join(', '));
   try {
@@ -229,10 +206,6 @@ function debugQuest(quest) {
   } catch(e){ log.warn('  [DEBUG] Loi: '+e.message); }
 }
 
-// =========================
-// DANG 1: XEM VIDEO
-// Logic chinh xac tu engine.ts goc
-// =========================
 async function farmVideo(quest, token) {
   var qid    = quest.id;
   var target = getTarget(quest);
@@ -248,7 +221,7 @@ async function farmVideo(quest, token) {
 
   var finished = false;
 
-  // Vong lap chinh xac tu engine.ts: tang 7s, check maxAllowed
+
   while (done < target) {
     var maxAllowed = Math.floor((Date.now() - enrolledAt) / 1000) + 10;
     var diff = maxAllowed - done;
@@ -259,12 +232,12 @@ async function farmVideo(quest, token) {
 
       if (res.status === 429) {
         var wait = ((res.data && res.data.retry_after) || 5);
-        log.warn('  ⏳ Rate limit, doi '+wait+'s...');
+        log.warn('   Rate limit, doi '+wait+'s...');
         await sleep(wait * 1000);
         continue;
       }
       if (!res.ok) {
-        log.warn('  ⚠ video-progress loi status '+res.status+': '+JSON.stringify(res.data).substring(0,100));
+        log.warn('   video-progress loi status '+res.status+': '+JSON.stringify(res.data).substring(0,100));
         break;
       }
 
@@ -279,33 +252,28 @@ async function farmVideo(quest, token) {
 
   if (!finished) {
     var final = await api('POST', '/quests/'+qid+'/video-progress', token, { timestamp: target });
-    log.info('  🎬 Gui timestamp cuoi '+target+'s: status '+final.status);
+    log.info('   Gui timestamp cuoi '+target+'s: status '+final.status);
   }
 
-  log.success('  ✅ Video hoan thanh!');
+  log.success(' Video hoan thanh!');
   return true;
 }
 
-// =========================
-// DANG 2: CHOI GAME
-// Logic chinh xac tu engine.ts goc: heartbeat moi 60s
-// =========================
 async function farmGame(quest, token) {
   var qid   = quest.id;
   var appId = getAppId(quest);
-  var target = getTarget(quest); // tinh bang giay
-
+  var target = getTarget(quest); 
   if (!appId) {
-    log.error('  ❌ Khong tim duoc application_id! Quest nay co the khong ho tro auto farm game.');
+    log.error('   Khong tim duoc application_id! Quest nay co the khong ho tro auto farm game.');
     var _tc = getTaskConfig(quest); log.info('  [DEBUG] task_config(v2): ' + JSON.stringify(_tc).substring(0,300));
     return false;
   }
 
   var totalMin = Math.ceil(target / 60);
-  log.info('  🎮 Game | AppID: '+appId+' | Can: ~'+totalMin+' phut | Heartbeat moi 60s');
+  log.info(' Game | AppID: '+appId+' | Can: ~'+totalMin+' phut | Heartbeat moi 60s');
 
   var completed = false;
-  var maxHB = totalMin + 5; // du phong
+  var maxHB = totalMin + 5; 
 
   for (var h = 0; h < maxHB; h++) {
     var res = await api('POST', '/quests/'+qid+'/heartbeat', token, {
@@ -315,26 +283,26 @@ async function farmGame(quest, token) {
 
     if (res.status === 429) {
       var wait = ((res.data && res.data.retry_after) || 60);
-      log.warn('  ⏳ Rate limit, doi '+wait+'s...');
+      log.warn('   Rate limit, doi '+wait+'s...');
       await sleep(wait * 1000);
       h--;
       continue;
     }
     if (!res.ok) {
-      log.warn('  ⚠ Heartbeat loi status '+res.status+': '+JSON.stringify(res.data).substring(0,100));
+      log.warn('   Heartbeat loi status '+res.status+': '+JSON.stringify(res.data).substring(0,100));
       if (res.status === 400 || res.status === 404) break;
     }
 
-    // Cap nhat tien do tu response (response chinh la user_status moi)
+    
     if (res.data && res.data.completed_at) {
       completed = true;
-      log.success('  ✅ Game quest hoan thanh!');
+      log.success('   Game quest hoan thanh!');
       break;
     }
 
-    // Cap nhat user_status tu response heartbeat
+   
     if (res.data && res.data.user_id) quest.user_status = res.data;
-    // In tien do
+  
     var curVal = 0;
     try {
       var _t2 = detectType(quest);
@@ -343,23 +311,20 @@ async function farmGame(quest, token) {
     log.info('  🎮 HB '+(h+1)+'/'+maxHB+' | '+(curVal?Math.round(curVal/60)+'min':'OK'));
 
     if (h < maxHB-1) {
-      log.info('  ⏳ Doi 60s...');
+      log.info('Doi 60s...');
       await sleep(60000);
     }
   }
 
-  // Heartbeat terminal de ket thuc phien
+
   await api('POST', '/quests/'+qid+'/heartbeat', token, {
     application_id: appId,
     terminal: true,
   });
-  log.info('  🎮 Da gui terminal heartbeat');
+  log.info('  Da gui terminal heartbeat');
   return completed;
 }
 
-// =========================
-// XU LY 1 QUEST
-// =========================
 async function processQuest(quest, token, mode, debug) {
   var name   = getName(quest);
   var type   = detectType(quest);
@@ -371,15 +336,15 @@ async function processQuest(quest, token, mode, debug) {
 
   if (debug) debugQuest(quest);
 
-  if (isClaimed(quest))   { log.success('  🎁 Da nhan phan thuong, bo qua.'); return 'claimed'; }
-  if (isExpired(quest))   { log.warn('  ⏰ Da het han.'); return 'expired'; }
+  if (isClaimed(quest))   { log.success('   Da nhan phan thuong, bo qua.'); return 'claimed'; }
+  if (isExpired(quest))   { log.warn('   Da het han.'); return 'expired'; }
   if (isCompleted(quest)) {
     log.success('  ✅ Da hoan thanh — vao Discord de claim!');
     log.info('  🔗 https://discord.com/quests/'+quest.id);
     return 'completed_unclaimed';
   }
 
-  // Loc theo mode
+  
   var isVid  = type===T.WATCH_VIDEO || type===T.WATCH_VIDEO_ON_MOBILE;
   var isGame = type===T.PLAY_ON_DESKTOP || type===T.STREAM_ON_DESKTOP;
 
@@ -387,7 +352,7 @@ async function processQuest(quest, token, mode, debug) {
   if (mode==='2' && !isGame) { log.warn('  ⚠ Khong phai quest game, bo qua.'); return 'wrong_type'; }
   if (!isVid && !isGame)     { log.warn('  ⚠ Loai ['+type+'] chua ho tro.'); return 'unsupported'; }
 
-  // Enroll
+ 
   if (!isEnrolled(quest)) {
     log.info('  [~] Chua enroll, dang tham gia...');
     var er = await api('POST', '/quests/'+quest.id+'/enroll', token, {
@@ -397,7 +362,7 @@ async function processQuest(quest, token, mode, debug) {
       log.error('  ❌ Enroll that bai: '+er.status+' | '+JSON.stringify(er.data).substring(0,100));
       return 'enroll_failed';
     }
-    // Cap nhat user_status
+    
     quest.user_status = er.data;
     log.success('  ✅ Enroll thanh cong!');
     await sleep(2000);
@@ -416,29 +381,27 @@ async function processQuest(quest, token, mode, debug) {
   return 'done';
 }
 
-// =========================
-// RUN
-// =========================
+
 async function run(rl) {
   log.info('');
   log.info('╔'+'='.repeat(58)+'╗');
-  log.info('║       🔮 DISCORD QUEST ORBS FARMER v2.1          ║');
+  log.info('║       Darkness Tool         ║');
   log.info('╚'+'='.repeat(58)+'╝');
   log.info('');
   log.info('  Dang 1: Xem video  🎬  (WATCH_VIDEO)');
   log.info('  Dang 2: Choi game  🎮  (PLAY_ON_DESKTOP)');
   log.info('');
 
-  var mode = (await ask(rl,'  🔢 Chon dang (1/2): ')).trim();
+  var mode = (await ask(rl,'   Chon dang (1/2): ')).trim();
   if (mode!=='1'&&mode!=='2'){ log.error('Chon 1 hoac 2!'); return; }
-  log.success('[+] Mode: '+(mode==='1'?'🎬 Xem video':'🎮 Choi game'));
+  log.success('[+] Mode: '+(mode==='1'?' Xem video':' Choi game'));
   log.info('');
 
-  // Debug mode
-  var dbgInput = (await ask(rl,'  🐛 Bat debug de xem raw data? (y/N): ')).trim().toLowerCase();
+  
+  var dbgInput = (await ask(rl,'   Bat debug de xem raw data? (y/N): ')).trim().toLowerCase();
   var debug = dbgInput === 'y';
 
-  // Quest cu the hay lay tat ca
+ 
   log.info('');
   log.info('[~] Nhap quest ID/link hoac Enter de lay tat ca quest pending:');
   var qi = (await ask(rl,'  🔗 Quest (Enter = tat ca): ')).trim();
@@ -446,16 +409,16 @@ async function run(rl) {
   if (qi && !questId){ log.error('Link/ID khong hop le!'); return; }
   log.info('');
 
-  // Token
+  
   log.info('[~] Chon token:  1=Nhap tay  2=token.txt');
-  var tm = (await ask(rl,'  🔢 (1/2): ')).trim();
+  var tm = (await ask(rl,'   (1/2): ')).trim();
   var tokens = [];
   if (tm==='2'){
     tokens = loadLines(path.join(__dirname,'..','token.txt'));
     if (!tokens.length){ log.error('token.txt trong!'); return; }
     log.success('[+] '+tokens.length+' token');
   } else {
-    var tk = (await ask(rl,'  🎫 Token: ')).trim();
+    var tk = (await ask(rl,'   Token: ')).trim();
     if (tk.length<20){ log.error('Token qua ngan!'); return; }
     tokens = [tk];
   }
@@ -468,7 +431,7 @@ async function run(rl) {
     log.info('═'.repeat(60));
     log.info('  Token ['+(ti+1)+'/'+tokens.length+']: '+token.substring(0,25)+'...');
 
-    // Validate
+
     var me = await api('GET','/users/@me',token);
     if (!me.ok || !me.data || !me.data.id){
       log.error('  ❌ Token khong hop le! Status: '+me.status);
@@ -477,18 +440,18 @@ async function run(rl) {
       continue;
     }
     var user = me.data;
-    log.success('  ✅ '+user.username+' ('+user.id+')');
+    log.success('   '+user.username+' ('+user.id+')');
 
-    // Orbs truoc
+
     var balR = await api('GET','/users/@me/virtual-currency/balance',token);
     var balBefore = (balR.ok && balR.data) ? balR.data.balance : null;
-    if (balBefore!==null) log.info('  🔮 Orbs hien tai: '+balBefore);
+    if (balBefore!==null) log.info('   Orbs hien tai: '+balBefore);
 
-    // Lay quest(s)
+   
     var quests = [];
 
     if (questId) {
-      // Lay 1 quest cu the — dung /quests/@me roi filter de co user_status
+      
       var allR = await api('GET','/quests/@me',token);
       if (debug) log.info('  [DEBUG] /quests/@me status: '+allR.status+' | keys: '+Object.keys(allR.data||{}).join(', '));
 
@@ -519,7 +482,7 @@ async function run(rl) {
         continue;
       }
     } else {
-      // Lay tat ca
+      
       var allR2 = await api('GET','/quests/@me',token);
       if (!allR2.ok || !allR2.data || !allR2.data.quests){
         log.error('  ❌ Loi lay quest list: '+allR2.status);
@@ -536,7 +499,7 @@ async function run(rl) {
         debugQuest(all[0]);
       }
 
-      // Loc theo mode
+      
       quests = all.filter(function(q){
         if (isClaimed(q) || isExpired(q)) return false;
         var t = detectType(q);
@@ -560,7 +523,7 @@ async function run(rl) {
       log.success('  ✅ '+quests.length+' quest phu hop');
     }
 
-    // Xu ly tung quest
+  
     var results = [];
     for (var qi2=0; qi2<quests.length; qi2++) {
       var result = await processQuest(quests[qi2], token, mode, debug);
@@ -569,14 +532,14 @@ async function run(rl) {
       if (qi2 < quests.length-1) await sleep(3000);
     }
 
-    // Orbs sau
+    
     var balR2 = await api('GET','/users/@me/virtual-currency/balance',token);
     var balAfter = (balR2.ok && balR2.data) ? balR2.data.balance : null;
     var gained = (balBefore!==null && balAfter!==null) ? balAfter - balBefore : null;
 
     if (balAfter!==null){
       log.info('');
-      log.info('  🔮 Truoc: '+(balBefore||'?')+' | Sau: '+balAfter+(gained&&gained>0?' | +'+gained+' Orbs!':''));
+      log.info('   Truoc: '+(balBefore||'?')+' | Sau: '+balAfter+(gained&&gained>0?' | +'+gained+' Orbs!':''));
     }
 
     summary.push({ user:user.username, orbsBefore:balBefore, orbsAfter:balAfter, gained:gained, quests:results });
@@ -584,7 +547,7 @@ async function run(rl) {
     if (ti < tokens.length-1){ log.info(''); log.info('[~] Doi 5s...'); await sleep(5000); }
   }
 
-  // TONG KET
+  
   log.info('');
   log.info('╔'+'='.repeat(58)+'╗');
   log.info('║                  📊 TONG KET                     ║');
