@@ -1,8 +1,5 @@
 'use strict';
 
-// ============================
-// FIX UTF-8
-// ============================
 process.stdout.setEncoding('utf8');
 process.stdin.setEncoding('utf8');
 
@@ -17,9 +14,6 @@ const http  = require('http');
 const crypto = require('crypto');
 const { log, sleep, ask } = require('../utils/theme');
 
-// ============================
-// SIGNATURE (X-Gorgon / X-Khronos)
-// ============================
 class Signature {
   constructor(params, data, cookies) {
     this.params  = params  || '';
@@ -108,9 +102,6 @@ class Signature {
   }
 }
 
-// ============================
-// LAY VIDEO ID TU LINK
-// ============================
 function extractVideoId(link) {
   return new Promise((resolve) => {
 
@@ -129,16 +120,15 @@ function extractVideoId(link) {
 
     const req = proto.request(options, (res) => {
 
-      // Xu ly redirect
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
         const redirectUrl = res.headers.location;
-        // Tim video id trong redirect URL
+
         const idMatch = redirectUrl.match(/\/video\/(\d+)/);
         if (idMatch) {
           resolve(idMatch[1]);
           return;
         }
-        // Theo redirect
+
         extractVideoId(redirectUrl).then(resolve);
         res.resume();
         return;
@@ -147,11 +137,11 @@ function extractVideoId(link) {
       let data = '';
       res.on('data', chunk => { data += chunk; });
       res.on('end', () => {
-        // Tim trong URL
+     
         const urlMatch = link.match(/\/video\/(\d+)/);
         if (urlMatch) { resolve(urlMatch[1]); return; }
 
-        // Tim trong HTML
+      
         const htmlMatch = data.match(/"video":\{"id":"(\d+)"/);
         if (htmlMatch) { resolve(htmlMatch[1]); return; }
 
@@ -169,25 +159,16 @@ function extractVideoId(link) {
   });
 }
 
-// ============================
-// RANDOM HEX
-// ============================
 function randomHex(bytes) {
   return crypto.randomBytes(bytes).toString('hex');
 }
 
-// ============================
-// RANDOM DATE (2020 - 2024)
-// ============================
 function randomInstallTime() {
   const start = new Date(2020, 0, 1).getTime() / 1000;
   const end   = new Date(2024, 11, 31, 23, 59, 59).getTime() / 1000;
   return Math.floor(start + Math.random() * (end - start));
 }
 
-// ============================
-// GUI VIEW REQUEST
-// ============================
 function sendView(videoId, agent) {
   return new Promise((resolve) => {
 
@@ -285,9 +266,7 @@ function sendView(videoId, agent) {
   });
 }
 
-// ============================
-// RUN
-// ============================
+
 async function run(rl) {
 
   try {
@@ -295,9 +274,9 @@ async function run(rl) {
     console.clear();
 
     log.info('=== TIKTOK VIEW BOOSTER ===');
-    log.info('Tang luot xem video TikTok\n');
+    log.info('buff view tiktok thoi\n');
 
-    // NHAP LINK VIDEO
+
     const linkInput = await ask(rl, 'Nhap link video TikTok > ');
     const link = linkInput.trim();
 
@@ -310,7 +289,7 @@ async function run(rl) {
 
     let videoId = null;
 
-    // Thu lay tu link truoc
+   
     const urlMatch = link.match(/\/video\/(\d+)/);
     if (urlMatch) {
       videoId = urlMatch[1];
@@ -319,7 +298,7 @@ async function run(rl) {
     }
 
     if (!videoId) {
-      // Neu khong lay duoc, hoi nhap truc tiep
+    
       const idInput = await ask(rl, 'Khong lay duoc ID tu link. Nhap Video ID truc tiep > ');
       videoId = idInput.trim();
       if (!videoId) {
@@ -330,7 +309,7 @@ async function run(rl) {
 
     log.success(`Video ID: ${videoId}\n`);
 
-    // NHAP SO LUONG WORKER
+ 
     const workerInput = await ask(rl, 'So luong worker dong thoi (Enter = 50) > ');
     const WORKERS = Math.max(1, Math.min(500, parseInt(workerInput) || 50));
 
@@ -338,7 +317,7 @@ async function run(rl) {
     log.info(`Bat dau voi ${WORKERS} workers...`);
     log.info('Nhan Ctrl+C de dung.\n');
 
-    // Tao HTTP Agent voi connection pooling
+   
     const agent = new https.Agent({
       keepAlive: true,
       maxSockets: WORKERS,
@@ -350,7 +329,7 @@ async function run(rl) {
     let totalFailed  = 0;
     let running = true;
 
-    // Xu ly Ctrl+C
+
     const stopHandler = () => {
       running = false;
       log.warn('\nDang dung...');
@@ -359,13 +338,13 @@ async function run(rl) {
 
     const startTime = Date.now();
 
-    // Worker function - chay lien tuc cho den khi dung
+    
     async function worker() {
       while (running) {
         const result = await sendView(videoId, agent);
         if (result.ok) {
           totalSuccess++;
-          // Chi log thanh cong
+       
           const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
           const rate = (totalSuccess / (elapsed || 1)).toFixed(1);
 
@@ -380,16 +359,16 @@ async function run(rl) {
       }
     }
 
-    // Khoi chay tat ca workers dong thoi
+
     const workers = [];
     for (let i = 0; i < WORKERS; i++) {
       workers.push(worker());
     }
 
-    // Cho tat ca workers ket thuc (khi running = false)
+    
     await Promise.all(workers);
 
-    // Cleanup
+  
     process.removeListener('SIGINT', stopHandler);
     agent.destroy();
 
@@ -407,7 +386,5 @@ async function run(rl) {
   }
 }
 
-// ============================
-// EXPORT
-// ============================
+
 module.exports = { run };
